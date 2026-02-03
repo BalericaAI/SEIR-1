@@ -1,7 +1,7 @@
 # SEIR-1
 Systems Engineering & Identity Responsibility (SEIR-I)
 
-A 2-Year Applied Program in Cloud Infrastructure, Identity, and Federated Trust
+A 1.5-Year Applied Program in Cloud Infrastructure, Identity, and Federated Trust
 
 Infrastructure decides what can exist.
 Identity decides who is trusted.
