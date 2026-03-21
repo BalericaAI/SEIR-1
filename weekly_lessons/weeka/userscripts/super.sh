@@ -3,8 +3,9 @@ set -euo pipefail
 
 #Chewbacca: The node awakens. The ops panel must be beautiful.
 
-apt-get update -y
-apt-get install -y nginx curl jq
+sleep 5
+apt update -y
+apt install -y nginx curl jq
 
 # --- Helpers ---
 METADATA="http://metadata.google.internal/computeMetadata/v1"
