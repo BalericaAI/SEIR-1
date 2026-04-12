@@ -46,3 +46,16 @@ module "waf" {
   enable_waf_rules      = true
   enable_bot_management = false
 }
+
+
+module "postgres" {
+  source = "./modules/postgres"
+
+  name     = "${local.prefix}-${var.environment}"
+  region   = var.region
+  network  = module.vpc.network_id
+
+  db_name     = "chewbacca"
+  db_user     = "chewie"
+  db_password = "supersecret123"
+}
