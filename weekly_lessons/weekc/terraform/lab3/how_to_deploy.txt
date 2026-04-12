@@ -1,0 +1,13 @@
+DEV terraform apply -var-file="dev.tfvars"
+
+STAGE terraform apply -var-file="stage.tfvars"
+
+PROD terraform apply -var-file="prod.tfvars"
+
+
+terraform init -reconfigure
+
+terraform init \
+  -backend-config="prefix=terraform/dev"
+
+  
