@@ -13,3 +13,14 @@ variable "instance_group" {
 variable "domain_name" {
   type = string
 }
+
+variable "enable_waf" {
+  type    = bool
+  default = true
+}
+
+variable "allowed_ips" {
+  type    = list(string)
+  default = []
+}
+
