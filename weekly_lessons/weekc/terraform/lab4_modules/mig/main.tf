@@ -38,6 +38,7 @@ resource "google_project_iam_member" "secret_access" {
   member = "serviceAccount:${google_service_account.kubernetes.email}"
 }
 
+# For DB Proxy
 
 #resource "google_project_iam_member" "sql_client" {
 #  role   = "roles/cloudsql.client"
