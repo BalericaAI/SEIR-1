@@ -672,7 +672,7 @@ Two verification tools are included or may be provided during the lab.
 Run after completing Gate 4:
 
 ```bash
-python verify_all_gates.py \
+python 1-4-verify_all_gates.py \
   --user-upn chewbacca@balerica-ai.org
 ```
 
@@ -1092,7 +1092,7 @@ seir-crosscloud-iam/
 |
 ├── verification/
 │   |
-│   ├── verify_all_gates.py
+│   ├── 1-4-verify_all_gates.py
 │   └── verify_final_all_gates.py
 |
 ├── evidence/
@@ -2010,7 +2010,7 @@ Screenshot evidence
 
 PowerShell troubleshooting evidence
 
-verify_all_gates.py output
+1-4-verify_all_gates.py output
 
 verify_final_all_gates.py output
 

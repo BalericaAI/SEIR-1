@@ -133,7 +133,7 @@ Authorization does not.
 Before changing anything:
 
 ```bash
-python verify_all_gates.py \
+python 1-4-verify_all_gates.py \
   --user-upn chewbacca@balerica-ai.org
 ```
 
@@ -1335,4 +1335,4 @@ Together:
 
 # Final Result
 
-> A Microsoft Entra user has been authorized through Azure RBAC to interactively sign into a Windows Server 2025 machine physically hosted
+> A Microsoft Entra user has been authorized through Azure RBAC to interactively sign into a Windows Server 2025 machine physically hosted in Google Cloud Platform.

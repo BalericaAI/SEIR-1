@@ -60,12 +60,12 @@ Requirements:
 
 Example:
 
-python verify_all_gates.py \
+python 1-4-verify_all_gates.py \
     --user-upn chewbacca@balerica-ai.org
 
 Optional:
 
-python verify_all_gates.py \
+python 1-4-verify_all_gates.py \
     --project-id YOUR_GCP_PROJECT \
     --vm-name seir-crosscloud-01 \
     --zone us-central1-a \
