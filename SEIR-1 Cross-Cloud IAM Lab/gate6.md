@@ -8,7 +8,7 @@ Gate 5 proved that Azure RBAC can authorize a Microsoft Entra user to log into a
 
 The architecture currently looks like this:
 
-```text id="la1"
+```text
 
 Chewbacca
     |
@@ -26,7 +26,7 @@ But in a real organization, directly assigning infrastructure permissions to hun
 
 Gate 6 introduces the more common enterprise pattern:
 
-```text id="la2"
+```text
 
 Chewbacca
     |
@@ -45,7 +45,7 @@ The Azure role will belong to the **group**.
 
 The user's authorization will come from:
 
-```text id="la3"
+```text
 
 GROUP MEMBERSHIP
 ```
@@ -56,7 +56,7 @@ GROUP MEMBERSHIP
 
 Imagine an organization has:
 
-```text id="la4"
+```text
 
 500 Engineers
 
@@ -69,7 +69,7 @@ Imagine an organization has:
 
 Direct RBAC assignments could become:
 
-```text id="la5"
+```text
 
 User A -> Server 1
 User A -> Server 2
@@ -88,7 +88,7 @@ This quickly becomes difficult to manage.
 
 Instead:
 
-```text id="la6"
+```text
 
 Users
   |
@@ -110,7 +110,7 @@ Microsoft Entra security groups are specifically intended to help manage access 
 
 Instead of:
 
-```text id="la7"
+```text
 
 USER
   |
@@ -120,7 +120,7 @@ PERMISSION
 
 we want:
 
-```text id="la8"
+```text
 
 USER
   |
@@ -133,7 +133,7 @@ PERMISSION
 
 That produces an important separation:
 
-```text id="la9"
+```text
 
 Entra controls:
 WHO IS IN THE GROUP
@@ -150,13 +150,13 @@ Before changing the authorization model, verify that the current direct assignme
 
 Define the user:
 
-```bash id="la10"
+```bash
 USER_UPN="chewbacca@balerica-ai.org"
 ```
 
 Retrieve the user Object ID:
 
-```bash id="la11"
+```bash
 USER_OBJECT_ID=$(az ad user show \
     --id "$USER_UPN" \
     --query id \
@@ -165,7 +165,7 @@ USER_OBJECT_ID=$(az ad user show \
 
 Retrieve the Arc resource ID:
 
-```bash id="la12"
+```bash
 ARC_RESOURCE_ID=$(az connectedmachine show \
     --name seir-crosscloud-01 \
     --resource-group SEIR-ARC-RG \
@@ -175,7 +175,7 @@ ARC_RESOURCE_ID=$(az connectedmachine show \
 
 Verify the current role assignment:
 
-```bash id="la13"
+```bash
 az role assignment list \
     --assignee-object-id "$USER_OBJECT_ID" \
     --scope "$ARC_RESOURCE_ID" \
@@ -185,7 +185,7 @@ az role assignment list \
 
 You should see:
 
-```text id="la14"
+```text
 
 Virtual Machine User Login
 ```
@@ -194,7 +194,7 @@ Virtual Machine User Login
 
 # Current State
 
-```text id="la15"
+```text
 
 Chewbacca
     |
@@ -216,14 +216,14 @@ We are going to remove this model.
 
 Create:
 
-```text id="la16"
+```text
 
 SEIR_ARC_Users
 ```
 
 Run:
 
-```bash id="la17"
+```bash
 az ad group create \
     --display-name "SEIR_ARC_Users" \
     --mail-nickname "SEIRARCUsers" \
@@ -238,7 +238,7 @@ Azure CLI supports creating Microsoft Entra groups using `az ad group create`, w
 
 Run:
 
-```bash id="la18"
+```bash
 az ad group show \
     --group "SEIR_ARC_Users" \
     --query "{
@@ -252,14 +252,14 @@ az ad group show \
 
 The important result is:
 
-```text id="la19"
+```text
 
 SecurityEnabled = True
 ```
 
 We want a:
 
-```text id="la20"
+```text
 
 SECURITY GROUP
 ```
@@ -272,7 +272,7 @@ not a distribution list.
 
 Run:
 
-```bash id="la21"
+```bash
 GROUP_OBJECT_ID=$(az ad group show \
     --group "SEIR_ARC_Users" \
     --query id \
@@ -281,13 +281,13 @@ GROUP_OBJECT_ID=$(az ad group show \
 
 Verify:
 
-```bash id="la22"
+```bash
 echo "$GROUP_OBJECT_ID"
 ```
 
 Expected:
 
-```text id="la23"
+```text
 
 xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
@@ -298,7 +298,7 @@ xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 Our architecture currently looks like:
 
-```text id="la24"
+```text
 
 Microsoft Entra
 
@@ -309,7 +309,7 @@ SEIR_ARC_Users
 
 But:
 
-```text id="la25"
+```text
 
 Chewbacca
     |
@@ -322,7 +322,7 @@ Chewbacca is not yet a member.
 
 And:
 
-```text id="la26"
+```text
 
 SEIR_ARC_Users
     |
@@ -339,7 +339,7 @@ The group does not yet have any Azure permission.
 
 Run:
 
-```bash id="la27"
+```bash
 az ad group member add \
     --group "SEIR_ARC_Users" \
     --member-id "$USER_OBJECT_ID"
@@ -347,7 +347,7 @@ az ad group member add \
 
 Azure CLI supports adding an Entra object to a group using:
 
-```text id="la28"
+```text
 
 az ad group member add
 ```
@@ -360,7 +360,7 @@ with the member's Object ID.
 
 Run:
 
-```bash id="la29"
+```bash
 az ad group member check \
     --group "SEIR_ARC_Users" \
     --member-id "$USER_OBJECT_ID"
@@ -368,7 +368,7 @@ az ad group member check \
 
 Expected:
 
-```json id="la30"
+```json
 {
   "value": true
 }
@@ -382,7 +382,7 @@ Microsoft's Azure CLI includes `az ad group member check` specifically for verif
 
 Run:
 
-```bash id="la31"
+```bash
 az ad group member list \
     --group "SEIR_ARC_Users" \
     --query "[].{Name:displayName,UPN:userPrincipalName,ObjectId:id}" \
@@ -391,7 +391,7 @@ az ad group member list \
 
 You should see:
 
-```text id="la32"
+```text
 
 Chewbacca
 chewbacca@balerica-ai.org
@@ -401,7 +401,7 @@ chewbacca@balerica-ai.org
 
 # Current State
 
-```text id="la33"
+```text
 
 Chewbacca
     |
@@ -422,7 +422,7 @@ If we leave the direct Gate 5 assignment in place, we cannot prove that group au
 
 Remove:
 
-```text id="la34"
+```text
 
 Chewbacca
     |
@@ -432,7 +432,7 @@ Virtual Machine User Login
 
 Run:
 
-```bash id="la35"
+```bash
 az role assignment delete \
     --assignee-object-id "$USER_OBJECT_ID" \
     --role "Virtual Machine User Login" \
@@ -445,7 +445,7 @@ az role assignment delete \
 
 Run:
 
-```bash id="la36"
+```bash
 az role assignment list \
     --assignee-object-id "$USER_OBJECT_ID" \
     --scope "$ARC_RESOURCE_ID" \
@@ -455,7 +455,7 @@ az role assignment list \
 
 You should **not** see:
 
-```text id="la37"
+```text
 
 Virtual Machine User Login
 ```
@@ -466,7 +466,7 @@ Virtual Machine User Login
 
 Now:
 
-```text id="la38"
+```text
 
 Chewbacca
     |
@@ -476,7 +476,7 @@ SEIR_ARC_Users
 
 but:
 
-```text id="la39"
+```text
 
 SEIR_ARC_Users
     |
@@ -487,7 +487,7 @@ seir-crosscloud-01
 
 Therefore:
 
-```text id="la40"
+```text
 
 NO LOGIN AUTHORIZATION
 ```
@@ -504,7 +504,7 @@ Attempt a new Entra login.
 
 Expected:
 
-```text id="la41"
+```text
 
 ACCESS DENIED
 ```
@@ -513,7 +513,7 @@ Why?
 
 Because:
 
-```text id="la42"
+```text
 
 USER EXISTS             YES
 
@@ -530,21 +530,21 @@ Group membership alone does not create permission.
 
 Now assign:
 
-```text id="la43"
+```text
 
 Virtual Machine User Login
 ```
 
 to:
 
-```text id="la44"
+```text
 
 SEIR_ARC_Users
 ```
 
 Run:
 
-```bash id="la45"
+```bash
 az role assignment create \
     --assignee-object-id "$GROUP_OBJECT_ID" \
     --assignee-principal-type Group \
@@ -554,7 +554,7 @@ az role assignment create \
 
 Azure RBAC supports groups as security principals. Using the group's Object ID together with:
 
-```text id="la46"
+```text
 
 --assignee-principal-type Group
 ```
@@ -567,14 +567,14 @@ explicitly tells Azure that the principal is an Entra group.
 
 We could sometimes use:
 
-```text id="la47"
+```text
 
 SEIR_ARC_Users
 ```
 
 but for automation and infrastructure work, the safer identifier is:
 
-```text id="la48"
+```text
 
 GROUP OBJECT ID
 ```
@@ -589,7 +589,7 @@ Object IDs are the actual directory identifiers used by the authorization system
 
 Run:
 
-```bash id="la49"
+```bash
 az role assignment list \
     --assignee-object-id "$GROUP_OBJECT_ID" \
     --scope "$ARC_RESOURCE_ID" \
@@ -599,7 +599,7 @@ az role assignment list \
 
 Expected:
 
-```text id="la50"
+```text
 
 Role
 --------------------------
@@ -610,7 +610,7 @@ Virtual Machine User Login
 
 # The Authorization Chain Is Now Complete
 
-```text id="la51"
+```text
 
 Chewbacca
     |
@@ -637,21 +637,21 @@ Use the Entra login method from Gate 5.
 
 Authenticate as:
 
-```text id="la52"
+```text
 
 chewbacca@balerica-ai.org
 ```
 
 Expected:
 
-```text id="la53"
+```text
 
 ACCESS GRANTED
 ```
 
 The important difference is:
 
-```text id="la54"
+```text
 
 Gate 5:
 User had the role directly.
@@ -666,7 +666,7 @@ Group has the role.
 
 Run:
 
-```bash id="la55"
+```bash
 az role assignment list \
     --assignee-object-id "$USER_OBJECT_ID" \
     --scope "$ARC_RESOURCE_ID" \
@@ -676,7 +676,7 @@ az role assignment list \
 
 There should be no direct:
 
-```text id="la56"
+```text
 
 Virtual Machine User Login
 ```
@@ -687,7 +687,7 @@ Yet Chewbacca can log in.
 
 Therefore the effective authorization path is:
 
-```text id="la57"
+```text
 
 USER
  |
@@ -707,7 +707,7 @@ SERVER
 
 Instead of:
 
-```text id="la58"
+```text
 
 Bob     -> Server
 Alice   -> Server
@@ -718,7 +718,7 @@ Theo    -> Server
 
 we use:
 
-```text id="la59"
+```text
 
 Bob
 Alice
@@ -743,7 +743,7 @@ Now demonstrate access lifecycle management.
 
 Run:
 
-```bash id="la60"
+```bash
 az ad group member remove \
     --group "SEIR_ARC_Users" \
     --member-id "$USER_OBJECT_ID"
@@ -755,7 +755,7 @@ az ad group member remove \
 
 Run:
 
-```bash id="la61"
+```bash
 az ad group member check \
     --group "SEIR_ARC_Users" \
     --member-id "$USER_OBJECT_ID"
@@ -763,7 +763,7 @@ az ad group member check \
 
 Expected:
 
-```json id="la62"
+```json
 {
   "value": false
 }
@@ -775,7 +775,7 @@ Expected:
 
 We did **not** change:
 
-```text id="la63"
+```text
 
 GCP VM
 
@@ -792,7 +792,7 @@ User Account
 
 The only change was:
 
-```text id="la64"
+```text
 
 GROUP MEMBERSHIP
 ```
@@ -801,7 +801,7 @@ GROUP MEMBERSHIP
 
 # Current State
 
-```text id="la65"
+```text
 
 Chewbacca
     |
@@ -831,7 +831,7 @@ Do not rely on an existing logged-in Windows session.
 
 Expected:
 
-```text id="la66"
+```text
 
 ACCESS DENIED
 ```
@@ -846,14 +846,14 @@ The server's permission did not change.
 
 The group still has:
 
-```text id="la67"
+```text
 
 Virtual Machine User Login
 ```
 
 Chewbacca lost access because:
 
-```text id="la68"
+```text
 
 Chewbacca
    |
@@ -872,7 +872,7 @@ Suppose Chewbacca leaves the infrastructure team.
 
 We do not need to find every server:
 
-```text id="la69"
+```text
 
 Server 1
 
@@ -889,7 +889,7 @@ and remove him individually.
 
 Instead:
 
-```text id="la70"
+```text
 
 Remove User
 from
@@ -904,7 +904,7 @@ The resource permissions remain attached to the group.
 
 Add the user back:
 
-```bash id="la71"
+```bash
 az ad group member add \
     --group "SEIR_ARC_Users" \
     --member-id "$USER_OBJECT_ID"
@@ -912,7 +912,7 @@ az ad group member add \
 
 Verify:
 
-```bash id="la72"
+```bash
 az ad group member check \
     --group "SEIR_ARC_Users" \
     --member-id "$USER_OBJECT_ID"
@@ -920,7 +920,7 @@ az ad group member check \
 
 Expected:
 
-```json id="la73"
+```json
 {
   "value": true
 }
@@ -934,14 +934,14 @@ Start another fresh RDP authentication.
 
 Expected:
 
-```text id="la74"
+```text
 
 ACCESS GRANTED
 ```
 
 You have now demonstrated:
 
-```text id="la75"
+```text
 
 GROUP MEMBER
      |
@@ -967,7 +967,7 @@ ACCESS ALLOWED
 
 During all three tests:
 
-```text id="la76"
+```text
 
 GROUP RBAC ASSIGNMENT
 
@@ -984,7 +984,7 @@ That is the point.
 
 ## User
 
-```bash id="la77"
+```bash
 az ad user show \
     --id "$USER_UPN" \
     --query "{User:displayName,UPN:userPrincipalName,ObjectId:id}" \
@@ -993,7 +993,7 @@ az ad user show \
 
 ## Group
 
-```bash id="la78"
+```bash
 az ad group show \
     --group "SEIR_ARC_Users" \
     --query "{Group:displayName,ObjectId:id,Security:securityEnabled}" \
@@ -1002,7 +1002,7 @@ az ad group show \
 
 ## Membership
 
-```bash id="la79"
+```bash
 az ad group member check \
     --group "SEIR_ARC_Users" \
     --member-id "$USER_OBJECT_ID"
@@ -1010,7 +1010,7 @@ az ad group member check \
 
 ## RBAC
 
-```bash id="la80"
+```bash
 az role assignment list \
     --assignee-object-id "$GROUP_OBJECT_ID" \
     --scope "$ARC_RESOURCE_ID" \
@@ -1022,7 +1022,7 @@ az role assignment list \
 
 # Final Architecture
 
-```text id="la81"
+```text
 
                      MICROSOFT ENTRA ID
                             |
@@ -1061,35 +1061,35 @@ az role assignment list \
 
 Microsoft Entra answers:
 
-```text id="la82"
+```text
 
 WHO IS CHEWBACCA?
 ```
 
 Group membership answers:
 
-```text id="la83"
+```text
 
 WHAT TEAM IS CHEWBACCA ON?
 ```
 
 Azure RBAC answers:
 
-```text id="la84"
+```text
 
 WHAT MAY THAT TEAM ACCESS?
 ```
 
 Azure Arc answers:
 
-```text id="la85"
+```text
 
 WHICH EXTERNAL SERVER IS THE RESOURCE?
 ```
 
 GCP answers:
 
-```text id="la86"
+```text
 
 WHERE DOES THE COMPUTER ACTUALLY RUN?
 ```
@@ -1118,42 +1118,42 @@ Gate 6 is complete when:
 
 ## Gate 1
 
-```text id="la87"
+```text
 
 GCP = COMPUTER
 ```
 
 ## Gate 2
 
-```text id="la88"
+```text
 
 ARC = BRIDGE
 ```
 
 ## Gate 3
 
-```text id="la89"
+```text
 
 ENTRA = DEVICE IDENTITY
 ```
 
 ## Gate 4
 
-```text id="la90"
+```text
 
 ENTRA = USER IDENTITY
 ```
 
 ## Gate 5
 
-```text id="la91"
+```text
 
 RBAC = DIRECT USER AUTHORIZATION
 ```
 
 ## Gate 6
 
-```text id="la92"
+```text
 
 GROUPS = ENTERPRISE AUTHORIZATION
 ```
@@ -1172,7 +1172,7 @@ Gate 6 answers the much more important enterprise question:
 
 Answer:
 
-```text id="la93"
+```text
 
 IDENTITY
     |
@@ -1192,7 +1192,7 @@ RESOURCE
 
 This is similar to how organizations manage many other resources:
 
-```text id="la94"
+```text
 
 Employee
    |
@@ -1220,7 +1220,7 @@ After completing Gate 6 manually, this is an excellent lab to reproduce using an
 
 The desired state can be described declaratively:
 
-```text id="la95"
+```text
 
 Create security group:
 SEIR_ARC_Users
@@ -1247,14 +1247,14 @@ The important rule is:
 
 First:
 
-```text id="la96"
+```text
 
 MANUAL IMPLEMENTATION
 ```
 
 Then:
 
-```text id="la97"
+```text
 
 AI-ASSISTED IMPLEMENTATION
 ```
